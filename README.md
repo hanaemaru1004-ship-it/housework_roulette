@@ -14,7 +14,7 @@
 
 - Next.js（App Router）/ React 19 / TypeScript
 - Tailwind CSS 4.x + shadcn/ui（base-nova, Base UIベース）
-- Prisma（開発環境: SQLite / 本番想定: MySQL）
+- Prisma（Neon / PostgreSQL、開発・本番共通）
 - NextAuth（Auth.js） Credentials Provider によるメール・パスワード認証
 - Vitest + React Testing Library
 
@@ -22,8 +22,8 @@
 
 ```bash
 npm install
-cp .env.example .env   # DATABASE_URL・AUTH_SECRETを設定する
-npx prisma migrate dev --name init
+cp .env.example .env   # DATABASE_URL・DIRECT_URL・AUTH_SECRETを設定する
+npm run prisma:migrate # Neonのデータベースにテーブルを作成
 npm run prisma:seed    # デモユーザー(demo@example.com / password1234)と初期家事を投入
 npm run dev
 ```
@@ -32,14 +32,31 @@ npm run dev
 
 | 変数名 | 説明 |
 | --- | --- |
-| `DATABASE_URL` | 開発環境では `file:./dev.db`（SQLite）。本番はMySQLの接続文字列 |
+| `DATABASE_URL` | Neon(PostgreSQL)の接続文字列。アプリ実行用のプーリング接続(ホスト名に `-pooler` が付く方) |
+| `DIRECT_URL` | Neonの直接接続文字列。`prisma migrate` はプーリング接続を通せないためマイグレーション専用に使用 |
 | `AUTH_SECRET` | NextAuthのセッション署名鍵。`openssl rand -base64 32` などで生成 |
 
 `NEXT_PUBLIC_` プレフィックスの環境変数としてDB接続情報を公開しないこと。
 
-### 本番DB(MySQL)への切り替え
+### データベース(Neon / PostgreSQL)
 
-`prisma/schema.prisma` の `datasource db` にある `provider` を `"sqlite"` から `"mysql"` に変更し、`DATABASE_URL` をMySQLの接続文字列に差し替えるだけで移行できるようにスキーマを設計しています（enumやSQLite固有のネイティブ型は使用していません）。
+開発・本番ともにNeonを使用します。PostgreSQLはネイティブに外部キー制約をサポートするため、スキーマは通常のリレーション定義のままです。
+
+Neonのサーバーレス環境では同時接続数が多くなりやすいため、`schema.prisma` の `datasource` に `url`(プーリング接続、アプリ実行用)と `directUrl`(直接接続、マイグレーション専用)を分けて定義しています。`prisma migrate dev` / `deploy` は `directUrl` を自動的に使用します。
+
+スキーマ変更は通常のPrisma Migrateフローで反映します:
+
+1. `schema.prisma` を変更する
+2. `npm run prisma:migrate` でマイグレーションファイルを生成し、開発用Neonデータベースに適用する
+3. 生成された `prisma/migrations/` 配下のSQLをコミットする
+4. 本番では `npm run prisma:deploy`(`prisma migrate deploy`)で同じマイグレーションを適用する
+
+### Vercelへのデプロイ
+
+1. Neonでプロジェクト(データベース)を作成し、プーリング接続文字列と直接接続文字列を発行する
+2. Vercelプロジェクトの環境変数に `DATABASE_URL`(プーリング接続)・`DIRECT_URL`(直接接続)・`AUTH_SECRET` を設定する
+3. `npm install` 時に `postinstall` スクリプトが `prisma generate` を実行するため、追加のビルド設定は不要
+4. デプロイ前(またはデプロイ後に一度)に `npm run prisma:deploy` を本番用の `DATABASE_URL`/`DIRECT_URL` に向けて実行し、テーブルを用意しておく(Vercelのビルドステップではマイグレーションを自動実行しない)
 
 ## コマンド
 
@@ -51,7 +68,8 @@ npm run dev
 | `npm run typecheck` | 型チェック(`tsc --noEmit`) |
 | `npm run test` | Vitestによるテスト実行 |
 | `npm run quality` | lint → typecheck → test → build を通しで実行 |
-| `npm run prisma:migrate` | Prismaマイグレーション |
+| `npm run prisma:migrate` | 開発用DBにマイグレーションを作成・適用(`prisma migrate dev`) |
+| `npm run prisma:deploy` | 本番用DBにマイグレーションを適用(`prisma migrate deploy`) |
 | `npm run prisma:seed` | デモユーザー・初期家事データの投入 |
 
 ## ルーレットの抽選ロジック

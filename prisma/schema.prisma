@@ -1,10 +1,14 @@
 // 家事ルーレットアプリのデータモデル定義。
-// 開発環境ではSQLiteを使用し、本番移行時は provider を "mysql" に変更するだけで
-// 済むように、enumやprovider固有のネイティブ型は使わない設計にしている。
+// 本番・開発ともにNeon(PostgreSQL)を使用する。Neonのサーバーレス接続では
+// アプリ実行用にコネクションプーリング経由(url)、マイグレーション実行用に
+// 直接接続(directUrl)を使い分けるのがPrisma公式推奨構成のため、両方定義する。
+// PostgreSQLはネイティブに外部キー制約をサポートするため relationMode の
+// エミュレーションは不要。
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -53,4 +57,5 @@ model HistoryEntry {
   completedAt DateTime       @default(now())
 
   @@index([userId, completedAt])
+  @@index([taskId])
 }

@@ -6,7 +6,7 @@ export const signupSchema = z.object({
   password: z
     .string()
     .min(8, { message: "パスワードは8文字以上で入力してください" }),
-  name: z.string().min(1).max(50).optional(),
+  name: z.string().max(50).optional().or(z.literal("")),
 });
 export type SignupInput = z.infer<typeof signupSchema>;
 
