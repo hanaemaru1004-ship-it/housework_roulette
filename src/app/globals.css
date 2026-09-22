@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+ * ライトモードのみ対応のため、shadcnコンポーネントが持つ dark: バリアントの
+ * ユーティリティクラスをOSの配色設定に関わらず常に無効化する。
+ */
+@custom-variant dark (&:is(.never-dark-mode));
+
+/*
+ * 「家事管理」ではなくゲーム感覚の明るい雰囲気を出すための配色。
+ * ライトモードのみ対応（ダークモードは実装しない）。
+ */
+:root {
+  --background: #fff7ed;
+  --foreground: #3b2f2a;
+  --card: #ffffff;
+  --card-foreground: #3b2f2a;
+  --popover: #ffffff;
+  --popover-foreground: #3b2f2a;
+  --primary: #ff7a45;
+  --primary-foreground: #ffffff;
+  --secondary: #ffedd9;
+  --secondary-foreground: #7a4a21;
+  --muted: #f5ede3;
+  --muted-foreground: #8a7b6c;
+  --accent: #2fbf9e;
+  --accent-foreground: #ffffff;
+  --destructive: #e5484d;
+  --destructive-foreground: #ffffff;
+  --border: #f0e4d6;
+  --input: #f0e4d6;
+  --ring: #ff7a45;
+  --radius: 1rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-sans);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+html {
+  color-scheme: light;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

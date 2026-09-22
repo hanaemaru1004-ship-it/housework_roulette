@@ -1,0 +1,56 @@
+// 家事ルーレットアプリのデータモデル定義。
+// 開発環境ではSQLiteを使用し、本番移行時は provider を "mysql" に変更するだけで
+// 済むように、enumやprovider固有のネイティブ型は使わない設計にしている。
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ユーザー（家事データ・履歴はすべてこのモデルに紐づいて分離される）
+model User {
+  id           String          @id @default(cuid())
+  email        String          @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  tasks        HouseworkTask[]
+  histories    HistoryEntry[]
+}
+
+// 家事マスタ（ユーザーごとに保持する）
+model HouseworkTask {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  durationMin Int
+  difficulty  Int // 1(かなり楽)〜5(大変)
+  category    String?
+  description String?
+  isActive    Boolean        @default(true) // 論理削除フラグ（履歴の整合性を保つため物理削除しない）
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  histories   HistoryEntry[]
+
+  @@index([userId])
+}
+
+// 完了した家事の履歴（家事が削除されても記録が残るよう名前・所要時間をスナップショットする）
+model HistoryEntry {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId      String?
+  task        HouseworkTask? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  taskName    String
+  durationMin Int
+  completedAt DateTime       @default(now())
+
+  @@index([userId, completedAt])
+}
