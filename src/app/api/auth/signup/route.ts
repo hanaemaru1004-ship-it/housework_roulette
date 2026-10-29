@@ -18,12 +18,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const { email, password, name } = parsed.data;
+  const { username, password, name } = parsed.data;
 
-  const existing = await prisma.user.findUnique({ where: { email } });
+  const existing = await prisma.user.findUnique({ where: { username } });
   if (existing) {
     return NextResponse.json(
-      { error: "このメールアドレスは既に登録されています" },
+      { error: "このユーザー名は既に登録されています" },
       { status: 409 },
     );
   }
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   // ユーザー作成と初期家事データの投入を1つのトランザクションで行う。
   const user = await prisma.$transaction(async (tx) => {
     const created = await tx.user.create({
-      data: { email, passwordHash, name },
+      data: { username, passwordHash, name },
     });
     await tx.houseworkTask.createMany({
       data: DEFAULT_HOUSEWORK_TASKS.map((task) => ({
@@ -44,5 +44,5 @@ export async function POST(request: Request) {
     return created;
   });
 
-  return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
+  return NextResponse.json({ id: user.id, username: user.username }, { status: 201 });
 }

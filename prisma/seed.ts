@@ -5,13 +5,13 @@ import bcrypt from "bcryptjs";
 import { DEFAULT_HOUSEWORK_TASKS } from "../src/lib/defaultTasks";
 import { prisma } from "../src/lib/prisma";
 
-const DEMO_EMAIL = "demo@example.com";
+const DEMO_USERNAME = "demo";
 const DEMO_PASSWORD = "password1234";
 
 async function main() {
-  const existing = await prisma.user.findUnique({ where: { email: DEMO_EMAIL } });
+  const existing = await prisma.user.findUnique({ where: { username: DEMO_USERNAME } });
   if (existing) {
-    console.log(`デモユーザーは既に存在します: ${DEMO_EMAIL}`);
+    console.log(`デモユーザーは既に存在します: ${DEMO_USERNAME}`);
     return;
   }
 
@@ -19,14 +19,14 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      email: DEMO_EMAIL,
+      username: DEMO_USERNAME,
       passwordHash,
       name: "デモユーザー",
       tasks: { create: [...DEFAULT_HOUSEWORK_TASKS] },
     },
   });
 
-  console.log(`デモユーザーを作成しました: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);
+  console.log(`デモユーザーを作成しました: ${DEMO_USERNAME} / ${DEMO_PASSWORD}`);
 }
 
 main()

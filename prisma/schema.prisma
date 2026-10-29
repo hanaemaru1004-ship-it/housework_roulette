@@ -18,7 +18,7 @@ generator client {
 // ユーザー（家事データ・履歴はすべてこのモデルに紐づいて分離される）
 model User {
   id           String          @id @default(cuid())
-  email        String          @unique
+  username     String          @unique
   passwordHash String
   name         String?
   createdAt    DateTime        @default(now())

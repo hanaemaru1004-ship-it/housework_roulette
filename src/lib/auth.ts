@@ -13,7 +13,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email: { label: "メールアドレス", type: "email" },
+        username: { label: "ユーザー名", type: "text" },
         password: { label: "パスワード", type: "password" },
       },
       authorize: async (credentials) => {
@@ -21,14 +21,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         const user = await prisma.user.findUnique({
-          where: { email: parsed.data.email },
+          where: { username: parsed.data.username },
         });
         if (!user) return null;
 
         const isValid = await bcrypt.compare(parsed.data.password, user.passwordHash);
         if (!isValid) return null;
 
-        return { id: user.id, email: user.email, name: user.name };
+        return { id: user.id, name: user.name ?? user.username };
       },
     }),
   ],

@@ -2,7 +2,13 @@ import { z } from "zod";
 
 // 認証まわり
 export const signupSchema = z.object({
-  email: z.string().email({ message: "正しいメールアドレスを入力してください" }),
+  username: z
+    .string()
+    .min(3, { message: "ユーザー名は3文字以上で入力してください" })
+    .max(30, { message: "ユーザー名は30文字以内で入力してください" })
+    .regex(/^[A-Za-z0-9_.-]+$/, {
+      message: "ユーザー名は半角英数字と _ . - のみ使えます",
+    }),
   password: z
     .string()
     .min(8, { message: "パスワードは8文字以上で入力してください" }),
@@ -11,7 +17,13 @@ export const signupSchema = z.object({
 export type SignupInput = z.infer<typeof signupSchema>;
 
 export const loginSchema = z.object({
-  email: z.string().email({ message: "正しいメールアドレスを入力してください" }),
+  username: z
+    .string()
+    .min(3, { message: "ユーザー名は3文字以上で入力してください" })
+    .max(30, { message: "ユーザー名は30文字以内で入力してください" })
+    .regex(/^[A-Za-z0-9_.-]+$/, {
+      message: "ユーザー名は半角英数字と _ . - のみ使えます",
+    }),
   password: z.string().min(1, { message: "パスワードを入力してください" }),
 });
 export type LoginInput = z.infer<typeof loginSchema>;

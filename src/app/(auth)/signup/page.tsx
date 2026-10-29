@@ -43,7 +43,7 @@ export default function SignupPage() {
 
       // 登録に成功したらそのままログインしてホームへ遷移する。
       const result = await signIn("credentials", {
-        email: data.email,
+        username: data.username,
         password: data.password,
         redirect: false,
       });
@@ -71,10 +71,10 @@ export default function SignupPage() {
               <Input id="name" autoComplete="name" {...register("name")} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">メールアドレス</Label>
-              <Input id="email" type="email" autoComplete="email" {...register("email")} />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+              <Label htmlFor="username">ユーザー名</Label>
+              <Input id="username" type="text" autoComplete="username" {...register("username")} />
+              {errors.username && (
+                <p className="text-sm text-destructive">{errors.username.message}</p>
               )}
             </div>
             <div className="space-y-2">

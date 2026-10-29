@@ -34,7 +34,7 @@ export default function LoginPage() {
         redirect: false,
       });
       if (result?.error) {
-        setFormError("メールアドレスまたはパスワードが正しくありません");
+        setFormError("ユーザー名またはパスワードが正しくありません");
         return;
       }
       router.push("/home");
@@ -53,10 +53,10 @@ export default function LoginPage() {
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
             <div className="space-y-2">
-              <Label htmlFor="email">メールアドレス</Label>
-              <Input id="email" type="email" autoComplete="email" {...register("email")} />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+              <Label htmlFor="username">ユーザー名</Label>
+              <Input id="username" type="text" autoComplete="username" {...register("username")} />
+              {errors.username && (
+                <p className="text-sm text-destructive">{errors.username.message}</p>
               )}
             </div>
             <div className="space-y-2">
